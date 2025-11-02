@@ -11,6 +11,8 @@ import { UserController } from './infrastructure/adapters/input/controllers/User
 import { createAuthRoutes } from './infrastructure/adapters/input/routes/auth.routes.js';
 import { createUserRoutes } from './infrastructure/adapters/input/routes/user.routes.js';
 import { errorMiddleware } from './infrastructure/adapters/input/middlewares/errorMiddleware.js';
+import swaggerUi from 'swagger-ui-express';
+import swaggerSpec from './infrastructure/config/swagger.config.js';
 
 export const createApp = () => {
   const app = express();
@@ -50,7 +52,11 @@ export const createApp = () => {
   app.get('/health', (req, res) => {
     res.status(200).json({ status: 'OK', timestamp: new Date().toISOString() });
   });
-
+  // Swagger
+  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+    customCss: '.swagger-ui .topbar { display: none }',
+    customSiteTitle: 'Kamino Users API'
+  }));
   // Rutas
   app.use('/api/auth', createAuthRoutes(authController));
   app.use('/api/users', createUserRoutes(userController));
