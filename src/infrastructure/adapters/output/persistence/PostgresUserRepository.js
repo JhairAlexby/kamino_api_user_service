@@ -42,8 +42,8 @@ export class PostgresUserRepository {
 
   async save(user) {
     const query = `
-      INSERT INTO users (email, password, first_name, last_name, role, is_active)
-      VALUES ($1, $2, $3, $4, $5, $6)
+      INSERT INTO users (email, password, first_name, last_name, role, is_active, created_at, updated_at)
+      VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())
       RETURNING *
     `;
     
@@ -108,5 +108,24 @@ async findAll() {
     updatedAt: row.updated_at
   }));
 }
+
+  async updateProfilePicture(userId, buffer) {
+    const query = 'UPDATE users SET profile_picture = $1 WHERE id = $2 RETURNING id';
+    const result = await pool.query(query, [buffer, userId]);
+    return result.rowCount > 0;
+  }
+
+  async deleteProfilePicture(userId) {
+    const query = 'UPDATE users SET profile_picture = NULL WHERE id = $1 RETURNING id';
+    const result = await pool.query(query, [userId]);
+    return result.rowCount > 0;
+  }
+
+  async getProfilePicture(userId) {
+    const query = 'SELECT profile_picture FROM users WHERE id = $1';
+    const result = await pool.query(query, [userId]);
+    if (result.rows.length === 0) return null;
+    return result.rows[0].profile_picture || null;
+  }
 }
 

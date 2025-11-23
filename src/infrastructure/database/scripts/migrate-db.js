@@ -2,6 +2,7 @@
 
 import dotenv from 'dotenv';
 import DatabaseInitializer from '../DatabaseInitializer.js';
+import { MigrationRunner } from '../MigrationRunner.js';
 
 // Load environment variables
 dotenv.config();
@@ -18,6 +19,11 @@ async function migrateDatabase() {
         // Sync models with alter: true to update existing tables
         console.log('📊 Synchronizing database models...');
         await dbInitializer.syncModels();
+
+        // Run pending migrations
+        console.log('🧩 Executing pending migrations...');
+        const runner = new MigrationRunner();
+        await runner.runPending();
         
         console.log('✅ Database migration completed successfully!');
         process.exit(0);

@@ -3,6 +3,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import sequelize from '../config/sequelize.config.js';
 import { UserModel, RefreshTokenModel } from '../models/index.js';
+import { MigrationRunner } from './MigrationRunner.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -28,6 +29,8 @@ class DatabaseInitializer {
             
             // Run SQL initialization script for additional setup
             await this.runInitializationScript();
+            // Run migrations
+            await this.runMigrations();
             
             console.log('Database initialization completed successfully');
             return true;
@@ -81,24 +84,25 @@ class DatabaseInitializer {
             
             const scriptPath = path.join(__dirname, 'init.sql');
             const sqlScript = await fs.readFile(scriptPath, 'utf8');
-            
-            // Split script by semicolons and execute each statement
-            const statements = sqlScript
-                .split(';')
-                .map(stmt => stmt.trim())
-                .filter(stmt => stmt.length > 0);
-            
-            for (const statement of statements) {
-                if (statement.trim()) {
-                    await this.sequelize.query(statement);
-                }
-            }
+            await this.sequelize.query(sqlScript);
             
             console.log('Database initialization script executed successfully');
         } catch (error) {
             console.error('Failed to run initialization script:', error);
             // Don't throw here as the models sync might be sufficient
             console.warn('Continuing without initialization script...');
+        }
+    }
+
+    async runMigrations() {
+        try {
+            console.log('Running pending migrations...');
+            const runner = new MigrationRunner();
+            await runner.runPending();
+            console.log('Migrations executed successfully');
+        } catch (error) {
+            console.error('Failed to execute migrations:', error);
+            throw error;
         }
     }
 

@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { authMiddleware } from '../middlewares/authMiddleware.js';
 import { adminMiddleware } from '../middlewares/adminMiddleware.js';
+import { upload } from '../middlewares/uploadMiddleware.js';
 
 export const createUserRoutes = (userController) => {
   const router = Router();
@@ -106,6 +107,119 @@ export const createUserRoutes = (userController) => {
   router.get('/admin-only', authMiddleware, adminMiddleware, (req, res) => {
     res.json({ message: 'Esta ruta es solo para administradores' });
   });
+
+  /**
+   * @swagger
+   * /api/users/{id}/profile-picture:
+   *   post:
+   *     summary: Subir nueva foto de perfil
+   *     tags: [Users]
+   *     security:
+   *       - bearerAuth: []
+   *     parameters:
+   *       - in: path
+   *         name: id
+   *         required: true
+   *         schema:
+   *           type: integer
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         multipart/form-data:
+   *           schema:
+   *             type: object
+   *             properties:
+   *               file:
+   *                 type: string
+   *                 format: binary
+   *           examples:
+   *             web:
+   *               summary: Ejemplo web
+   *               value: { }
+   *             mobile:
+   *               summary: Ejemplo móvil
+   *               value: { }
+   *     responses:
+   *       201:
+   *         description: Foto de perfil cargada
+   *       400:
+   *         description: Archivo requerido
+   *       403:
+   *         description: No autorizado
+   *       413:
+   *         description: Imagen demasiado grande
+   *       415:
+   *         description: Formato no soportado
+   */
+  router.post('/:id/profile-picture', authMiddleware, upload.single('file'), (req, res, next) =>
+    userController.uploadProfilePicture(req, res, next)
+  );
+
+  /**
+   * @swagger
+   * /api/users/{id}/profile-picture:
+   *   put:
+   *     summary: Actualizar foto de perfil
+   *     tags: [Users]
+   *     security:
+   *       - bearerAuth: []
+   *     parameters:
+   *       - in: path
+   *         name: id
+   *         required: true
+   *         schema:
+   *           type: integer
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         multipart/form-data:
+   *           schema:
+   *             type: object
+   *             properties:
+   *               file:
+   *                 type: string
+   *                 format: binary
+   *     responses:
+   *       200:
+   *         description: Foto de perfil actualizada
+   *       400:
+   *         description: Archivo requerido
+   *       403:
+   *         description: No autorizado
+   *       413:
+   *         description: Imagen demasiado grande
+   *       415:
+   *         description: Formato no soportado
+   */
+  router.put('/:id/profile-picture', authMiddleware, upload.single('file'), (req, res, next) =>
+    userController.updateProfilePicture(req, res, next)
+  );
+
+  /**
+   * @swagger
+   * /api/users/{id}/profile-picture:
+   *   delete:
+   *     summary: Eliminar foto de perfil
+   *     tags: [Users]
+   *     security:
+   *       - bearerAuth: []
+   *     parameters:
+   *       - in: path
+   *         name: id
+   *         required: true
+   *         schema:
+   *           type: integer
+   *     responses:
+   *       200:
+   *         description: Foto de perfil eliminada
+   *       403:
+   *         description: No autorizado
+   *       404:
+   *         description: Usuario no encontrado
+   */
+  router.delete('/:id/profile-picture', authMiddleware, (req, res, next) =>
+    userController.deleteProfilePicture(req, res, next)
+  );
 
   return router;
 };
