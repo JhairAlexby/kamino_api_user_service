@@ -40,8 +40,8 @@ export class UserController {
 
   async uploadProfilePicture(req, res, next) {
     try {
-      const userId = Number(req.params.id);
-      if (!req.user || (req.user.userId !== userId && req.user.role !== 'ADMIN')) {
+      const userId = req.params.id;
+      if (!req.user || (String(req.user.userId) !== String(userId) && req.user.role !== 'ADMIN')) {
         const error = new Error('No autorizado');
         error.status = 403;
         throw error;
@@ -61,8 +61,8 @@ export class UserController {
 
   async updateProfilePicture(req, res, next) {
     try {
-      const userId = Number(req.params.id);
-      if (!req.user || (req.user.userId !== userId && req.user.role !== 'ADMIN')) {
+      const userId = req.params.id;
+      if (!req.user || (String(req.user.userId) !== String(userId) && req.user.role !== 'ADMIN')) {
         const error = new Error('No autorizado');
         error.status = 403;
         throw error;
@@ -82,8 +82,8 @@ export class UserController {
 
   async deleteProfilePicture(req, res, next) {
     try {
-      const userId = Number(req.params.id);
-      if (!req.user || (req.user.userId !== userId && req.user.role !== 'ADMIN')) {
+      const userId = req.params.id;
+      if (!req.user || (String(req.user.userId) !== String(userId) && req.user.role !== 'ADMIN')) {
         const error = new Error('No autorizado');
         error.status = 403;
         throw error;

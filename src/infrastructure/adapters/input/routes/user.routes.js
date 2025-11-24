@@ -121,7 +121,8 @@ export const createUserRoutes = (userController) => {
    *         name: id
    *         required: true
    *         schema:
-   *           type: integer
+   *           type: string
+   *           description: ID del usuario (UUID o entero)
    *     requestBody:
    *       required: true
    *       content:
@@ -168,7 +169,8 @@ export const createUserRoutes = (userController) => {
    *         name: id
    *         required: true
    *         schema:
-   *           type: integer
+   *           type: string
+   *           description: ID del usuario (UUID o entero)
    *     requestBody:
    *       required: true
    *       content:
@@ -208,7 +210,8 @@ export const createUserRoutes = (userController) => {
    *         name: id
    *         required: true
    *         schema:
-   *           type: integer
+   *           type: string
+   *           description: ID del usuario (UUID o entero)
    *     responses:
    *       200:
    *         description: Foto de perfil eliminada
