@@ -4,6 +4,15 @@
 -- Ensure pgcrypto extension for UUID generation
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
+-- Create migrations log table (must exist before any insert)
+CREATE TABLE IF NOT EXISTS migrations_log (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(150) UNIQUE NOT NULL,
+    description TEXT,
+    applied_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_migrations_log_name ON migrations_log(name);
+
 -- Create users table (UUID primary key) for fresh setups
 CREATE TABLE IF NOT EXISTS users (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -98,12 +107,3 @@ BEGIN
     END IF;
 END
 $$;
-
--- Create migrations log table
-CREATE TABLE IF NOT EXISTS migrations_log (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(150) UNIQUE NOT NULL,
-    description TEXT,
-    applied_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
-CREATE INDEX IF NOT EXISTS idx_migrations_log_name ON migrations_log(name);
