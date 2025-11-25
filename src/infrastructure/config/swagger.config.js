@@ -61,6 +61,15 @@ const options = {
               type: 'boolean',
               example: true
             },
+            profilePhotoUrl: {
+              type: 'string',
+              example: 'https://cdn.example.com/users/123/avatar.jpg'
+            },
+            gender: {
+              type: 'string',
+              enum: ['MALE','FEMALE','NON_BINARY','OTHER'],
+              example: 'MALE'
+            },
             createdAt: {
               type: 'string',
               format: 'date-time'
@@ -92,6 +101,13 @@ const options = {
             lastName: {
               type: 'string',
               example: 'Pérez'
+            },
+            profilePhotoUrl: {
+              type: 'string'
+            },
+            gender: {
+              type: 'string',
+              enum: ['MALE','FEMALE','NON_BINARY','OTHER']
             }
           }
         },

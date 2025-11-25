@@ -8,7 +8,7 @@ const RefreshTokenModel = sequelize.define('RefreshToken', {
         autoIncrement: true
     },
     userId: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.UUID,
         allowNull: false,
         field: 'user_id',
         references: {

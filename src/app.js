@@ -46,7 +46,7 @@ export const createApp = () => {
 
   // Controladores
   const authController = new AuthController(userRepository, passwordHasher, tokenGenerator);
-  const userController = new UserController(userRepository);
+  const userController = new UserController(userRepository, passwordHasher);
 
   // Health check
   app.get('/health', (req, res) => {

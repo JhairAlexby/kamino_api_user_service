@@ -3,9 +3,9 @@ import sequelize from '../config/sequelize.config.js';
 
 const UserModel = sequelize.define('User', {
     id: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.UUID,
         primaryKey: true,
-        autoIncrement: true
+        defaultValue: DataTypes.UUIDV4
     },
     email: {
         type: DataTypes.STRING(255),
@@ -39,6 +39,15 @@ const UserModel = sequelize.define('User', {
         allowNull: false,
         defaultValue: true,
         field: 'is_active'
+    },
+    profilePhotoUrl: {
+        type: DataTypes.STRING(500),
+        allowNull: true,
+        field: 'profile_photo_url'
+    },
+    gender: {
+        type: DataTypes.STRING(20),
+        allowNull: true
     }
 }, {
     tableName: 'users',
