@@ -46,8 +46,8 @@ export class PostgresUserRepository {
 
   async save(user) {
     const query = `
-      INSERT INTO users (email, password, first_name, last_name, role, is_active, profile_photo_url, gender)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      INSERT INTO users (email, password, first_name, last_name, role, is_active, profile_photo_url, gender, created_at, updated_at)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW(), NOW())
       RETURNING *
     `;
     
@@ -82,8 +82,8 @@ export class PostgresUserRepository {
   async saveRefreshToken(userId, token) {
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
     const query = `
-      INSERT INTO refresh_tokens (user_id, token, expires_at)
-      VALUES ($1, $2, $3)
+      INSERT INTO refresh_tokens (user_id, token, expires_at, created_at)
+      VALUES ($1, $2, $3, NOW())
     `;
     await pool.query(query, [userId, token, expiresAt]);
   }

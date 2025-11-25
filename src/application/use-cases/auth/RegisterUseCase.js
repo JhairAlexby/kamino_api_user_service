@@ -9,7 +9,7 @@ export class RegisterUseCase {
     this.passwordHasher = passwordHasher;
   }
 
-  async execute({ email, password, firstName, lastName, role = 'USER' }) {
+  async execute({ email, password, firstName, lastName, role = 'USER', profilePhotoUrl = null, gender = null }) {
     const emailVO = new Email(email);
     const passwordVO = new Password(password);
 
@@ -25,7 +25,9 @@ export class RegisterUseCase {
       password: hashedPassword,
       firstName,
       lastName,
-      role: role === 'ADMIN' ? 'ADMIN' : 'USER'
+      role: role === 'ADMIN' ? 'ADMIN' : 'USER',
+      profilePhotoUrl: profilePhotoUrl ?? null,
+      gender: gender ?? null
     });
 
     const savedUser = await this.userRepository.save(user);
