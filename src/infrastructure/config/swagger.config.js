@@ -97,6 +97,27 @@ const options = {
             }
           }
         },
+        PlaceLike: {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'string',
+              format: 'uuid'
+            },
+            userId: {
+              type: 'string',
+              format: 'uuid'
+            },
+            placeId: {
+              type: 'string',
+              format: 'uuid'
+            },
+            createdAt: {
+              type: 'string',
+              format: 'date-time'
+            }
+          }
+        },
         RegisterRequest: {
           type: 'object',
           required: ['email', 'password', 'firstName', 'lastName'],
