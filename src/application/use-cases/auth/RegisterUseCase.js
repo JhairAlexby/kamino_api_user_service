@@ -9,7 +9,17 @@ export class RegisterUseCase {
     this.passwordHasher = passwordHasher;
   }
 
-  async execute({ email, password, firstName, lastName, role = 'USER', profilePhotoUrl = null, gender = null }) {
+  async execute({ 
+    email, 
+    password, 
+    firstName, 
+    lastName, 
+    role = 'USER', 
+    profilePhotoUrl = null, 
+    gender = null,
+    age = null,
+    preferredTags = []
+  }) {
     const emailVO = new Email(email);
     const passwordVO = new Password(password);
 
@@ -27,7 +37,11 @@ export class RegisterUseCase {
       lastName,
       role: role === 'ADMIN' ? 'ADMIN' : 'USER',
       profilePhotoUrl: profilePhotoUrl ?? null,
-      gender: gender ?? null
+      gender: gender ?? null,
+      age: age ?? null,
+      favoritePlaces: [],
+      visitedPlaces: [],
+      preferredTags: preferredTags ?? []
     });
 
     const savedUser = await this.userRepository.save(user);

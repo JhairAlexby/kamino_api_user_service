@@ -13,6 +13,8 @@ import { createUserRoutes } from './infrastructure/adapters/input/routes/user.ro
 import { errorMiddleware } from './infrastructure/adapters/input/middlewares/errorMiddleware.js';
 import swaggerUi from 'swagger-ui-express';
 import swaggerSpec from './infrastructure/config/swagger.config.js';
+import { FavoritesController } from './infrastructure/adapters/input/controllers/FavoritesController.js';
+import { createFavoritesRoutes } from './infrastructure/adapters/input/routes/favorites.routes.js';
 
 export const createApp = () => {
   const app = express();
@@ -47,7 +49,7 @@ export const createApp = () => {
   // Controladores
   const authController = new AuthController(userRepository, passwordHasher, tokenGenerator);
   const userController = new UserController(userRepository, passwordHasher);
-
+  const favoritesController = new FavoritesController(userRepository); 
   // Health check
   app.get('/health', (req, res) => {
     res.status(200).json({ status: 'OK', timestamp: new Date().toISOString() });
@@ -60,7 +62,7 @@ export const createApp = () => {
   // Rutas
   app.use('/api/auth', createAuthRoutes(authController));
   app.use('/api/users', createUserRoutes(userController));
-
+  app.use('/api/favorites', createFavoritesRoutes(favoritesController));
   // Manejo de errores
   app.use(errorMiddleware);
 

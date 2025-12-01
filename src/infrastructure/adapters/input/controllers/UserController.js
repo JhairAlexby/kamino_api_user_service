@@ -4,6 +4,8 @@ import { GetUserByIdUseCase } from '../../../../application/use-cases/user/GetUs
 import { UpdateUserUseCase } from '../../../../application/use-cases/user/UpdateUserUseCase.js';
 import { DeleteUserUseCase } from '../../../../application/use-cases/user/DeleteUserUseCase.js';
 import { RegisterUseCase } from '../../../../application/use-cases/auth/RegisterUseCase.js';
+import { GetUsersMLDataUseCase } from '../../../../application/use-cases/user/GetUsersMLDataUseCase.js';
+import { UpdatePreferredTagsUseCase } from '../../../../application/use-cases/user/UpdatePreferredTagsUseCase.js';
 
 export class UserController {
   constructor(userRepository, passwordHasher) {
@@ -13,6 +15,8 @@ export class UserController {
     this.updateUserUseCase = new UpdateUserUseCase(userRepository);
     this.deleteUserUseCase = new DeleteUserUseCase(userRepository);
     this.registerUseCase = new RegisterUseCase(userRepository, passwordHasher);
+    this.getUsersMLDataUseCase = new GetUsersMLDataUseCase(userRepository);
+    this.updatePreferredTagsUseCase = new UpdatePreferredTagsUseCase(userRepository);
   }
 
   async getProfile(req, res, next) {
@@ -67,6 +71,31 @@ export class UserController {
     try {
       const id = req.params.id;
       const result = await this.deleteUserUseCase.execute(id);
+      res.status(200).json(result);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async getMLData(req, res, next) {
+    try {
+      const result = await this.getUsersMLDataUseCase.execute();
+      res.status(200).json(result);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async updatePreferredTags(req, res, next) {
+    try {
+      const userId = req.user.userId;
+      const { tags } = req.body;
+      
+      if (!Array.isArray(tags)) {
+        return res.status(400).json({ error: 'tags debe ser un array' });
+      }
+      
+      const result = await this.updatePreferredTagsUseCase.execute(userId, tags);
       res.status(200).json(result);
     } catch (error) {
       next(error);

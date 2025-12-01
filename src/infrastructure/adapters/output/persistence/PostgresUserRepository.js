@@ -2,25 +2,35 @@ import { pool } from '../../../config/database.config.js';
 import { User } from '../../../../domain/entities/User.js';
 
 export class PostgresUserRepository {
+  _rowToUser(row) {
+    if (!row) return null;
+    
+    return new User({
+      id: row.id,
+      email: row.email,
+      firstName: row.first_name,
+      lastName: row.last_name,
+      password: row.password,
+      role: row.role,
+      isActive: row.is_active,
+      profilePhotoUrl: row.profile_photo_url,
+      gender: row.gender,
+      age: row.age,
+      favoritePlaces: row.favorite_places || [],
+      visitedPlaces: row.visited_places || [],
+      preferredTags: row.preferred_tags || [],
+      createdAt: row.created_at,
+      updatedAt: row.updated_at
+    });
+  }
+
   async findByEmail(email) {
     const query = 'SELECT * FROM users WHERE email = $1';
     const result = await pool.query(query, [email]);
     
     if (result.rows.length === 0) return null;
     
-    return new User({
-      id: result.rows[0].id,
-      email: result.rows[0].email,
-      firstName: result.rows[0].first_name,
-      lastName: result.rows[0].last_name,
-      password: result.rows[0].password,
-      role: result.rows[0].role,
-      isActive: result.rows[0].is_active,
-      profilePhotoUrl: result.rows[0].profile_photo_url,
-      gender: result.rows[0].gender,
-      createdAt: result.rows[0].created_at,
-      updatedAt: result.rows[0].updated_at
-    });
+    return this._rowToUser(result.rows[0]);
   }
 
   async findById(id) {
@@ -29,25 +39,17 @@ export class PostgresUserRepository {
     
     if (result.rows.length === 0) return null;
     
-    return new User({
-      id: result.rows[0].id,
-      email: result.rows[0].email,
-      firstName: result.rows[0].first_name,
-      lastName: result.rows[0].last_name,
-      password: result.rows[0].password,
-      role: result.rows[0].role,
-      isActive: result.rows[0].is_active,
-      profilePhotoUrl: result.rows[0].profile_photo_url,
-      gender: result.rows[0].gender,
-      createdAt: result.rows[0].created_at,
-      updatedAt: result.rows[0].updated_at
-    });
+    return this._rowToUser(result.rows[0]);
   }
 
   async save(user) {
     const query = `
-      INSERT INTO users (email, password, first_name, last_name, role, is_active, profile_photo_url, gender, created_at, updated_at)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW(), NOW())
+      INSERT INTO users (
+        email, password, first_name, last_name, role, is_active, 
+        profile_photo_url, gender, age, favorite_places, visited_places,
+        preferred_tags, created_at, updated_at
+      )
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, NOW(), NOW())
       RETURNING *
     `;
     
@@ -59,24 +61,16 @@ export class PostgresUserRepository {
       user.role,
       user.isActive,
       user.profilePhotoUrl ?? null,
-      user.gender ?? null
+      user.gender ?? null,
+      user.age ?? null,
+      JSON.stringify(user.favoritePlaces || []),
+      JSON.stringify(user.visitedPlaces || []),
+      JSON.stringify(user.preferredTags || [])
     ];
     
     const result = await pool.query(query, values);
     
-    return new User({
-      id: result.rows[0].id,
-      email: result.rows[0].email,
-      firstName: result.rows[0].first_name,
-      lastName: result.rows[0].last_name,
-      password: result.rows[0].password,
-      role: result.rows[0].role,
-      isActive: result.rows[0].is_active,
-      profilePhotoUrl: result.rows[0].profile_photo_url,
-      gender: result.rows[0].gender,
-      createdAt: result.rows[0].created_at,
-      updatedAt: result.rows[0].updated_at
-    });
+    return this._rowToUser(result.rows[0]);
   }
 
   async saveRefreshToken(userId, token) {
@@ -99,25 +93,12 @@ export class PostgresUserRepository {
     return result.rows.length > 0 ? result.rows[0] : null;
   }
 
-  
-async findAll() {
-  const query = 'SELECT * FROM users ORDER BY created_at DESC';
-  const result = await pool.query(query);
+  async findAll() {
+    const query = 'SELECT * FROM users ORDER BY created_at DESC';
+    const result = await pool.query(query);
 
-  return result.rows.map(row => new User({
-    id: row.id,
-    email: row.email,
-    firstName: row.first_name,
-    lastName: row.last_name,
-    password: row.password,
-    role: row.role,
-    isActive: row.is_active,
-    profilePhotoUrl: row.profile_photo_url,
-    gender: row.gender,
-    createdAt: row.created_at,
-    updatedAt: row.updated_at
-  }));
-}
+    return result.rows.map(row => this._rowToUser(row));
+  }
 
   async updateById(id, updates) {
     const allowed = {
@@ -126,51 +107,37 @@ async findAll() {
       role: updates.role,
       is_active: updates.isActive,
       profile_photo_url: updates.profilePhotoUrl,
-      gender: updates.gender
+      gender: updates.gender,
+      age: updates.age,
+      favorite_places: updates.favoritePlaces !== undefined
+        ? JSON.stringify(updates.favoritePlaces) 
+        : undefined,
+      visited_places: updates.visitedPlaces !== undefined
+        ? JSON.stringify(updates.visitedPlaces) 
+        : undefined,
+      preferred_tags: updates.preferredTags !== undefined
+        ? JSON.stringify(updates.preferredTags)
+        : undefined
     };
 
     const entries = Object.entries(allowed).filter(([_, v]) => v !== undefined);
+    
     if (entries.length === 0) {
-      const result = await pool.query('SELECT * FROM users WHERE id = $1', [id]);
-      return result.rows.length === 0 ? null : new User({
-        id: result.rows[0].id,
-        email: result.rows[0].email,
-        firstName: result.rows[0].first_name,
-        lastName: result.rows[0].last_name,
-        password: result.rows[0].password,
-        role: result.rows[0].role,
-        isActive: result.rows[0].is_active,
-        profilePhotoUrl: result.rows[0].profile_photo_url,
-        gender: result.rows[0].gender,
-        createdAt: result.rows[0].created_at,
-        updatedAt: result.rows[0].updated_at
-      });
+      return await this.findById(id);
     }
 
     const setClauses = entries.map(([k], i) => `${k} = $${i + 2}`).join(', ');
     const values = [id, ...entries.map(([, v]) => v)];
 
-    const query = `UPDATE users SET ${setClauses} WHERE id = $1 RETURNING *`;
+    const query = `UPDATE users SET ${setClauses}, updated_at = NOW() WHERE id = $1 RETURNING *`;
     const result = await pool.query(query, values);
+    
     if (result.rows.length === 0) return null;
-    const row = result.rows[0];
-    return new User({
-      id: row.id,
-      email: row.email,
-      firstName: row.first_name,
-      lastName: row.last_name,
-      password: row.password,
-      role: row.role,
-      isActive: row.is_active,
-      profilePhotoUrl: row.profile_photo_url,
-      gender: row.gender,
-      createdAt: row.created_at,
-      updatedAt: row.updated_at
-    });
+    
+    return this._rowToUser(result.rows[0]);
   }
 
   async deleteById(id) {
     await pool.query('DELETE FROM users WHERE id = $1', [id]);
   }
 }
-
